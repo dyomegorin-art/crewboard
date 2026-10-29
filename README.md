@@ -160,7 +160,7 @@ stateDiagram-v2
 
 ## Тесты и качество
 
-- **Backend**: 190+ тестов на настоящих PostgreSQL и Redis (отдельные БД), инжектируемые часы без `sleep`; покрытие `app/billing` и `app/api` — выше 90 %.
+- **Backend**: 186 тестов на настоящих PostgreSQL и Redis (отдельные БД), инжектируемые часы без `sleep`; покрытие `app/billing` и `app/api` — выше 90 %.
 - **Frontend**: `tsc --noEmit`, ESLint, `vite build`.
 - **e2e (Playwright)**: регистрация → письмо в Mailpit → проект и задача → drag-and-drop → апгрейд картой 4242 → приглашение с доплатой; отдельно — отказ картой 0002, лимиты Free, демо-вход и весь dunning со сдвигом часов.
 - **CI** (GitHub Actions): backend (ruff, format, mypy, `alembic check`, pytest + coverage), frontend (lint, typecheck, build), e2e (`docker compose up`, Playwright).
