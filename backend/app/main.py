@@ -27,7 +27,8 @@ async def request_id_middleware(
     request_id_var.set(rid)
     response = await call_next(request)
     response.headers["X-Request-ID"] = rid
-    log.info("%s %s -> %s", request.method, request.url.path, response.status_code)
+    if request.url.path != "/health":  # healthcheck дёргается каждые 3 с — не засоряем лог
+        log.info("%s %s -> %s", request.method, request.url.path, response.status_code)
     return response
 
 
