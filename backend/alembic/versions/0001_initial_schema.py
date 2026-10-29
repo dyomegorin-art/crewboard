@@ -59,7 +59,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
     )
     op.create_index(
-        "uq_users_email_lower", "users", [sa.literal_column("lower('email')")], unique=True
+        "uq_users_email_lower", "users", [sa.literal_column("lower(email)")], unique=True
     )
     op.create_table(
         "webhook_events",

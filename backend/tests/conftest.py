@@ -24,6 +24,7 @@ import asyncpg  # noqa: E402
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
+from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -66,7 +67,7 @@ async def client() -> AsyncIterator[AsyncClient]:
 
 
 @pytest_asyncio.fixture
-async def session() -> AsyncIterator["AsyncSession"]:
+async def session() -> AsyncIterator[AsyncSession]:
     from app.db import SessionLocal
 
     async with SessionLocal() as s:
@@ -122,5 +123,75 @@ def make_user():
     return _make
 
 
-if False:  # pragma: no cover
-    from sqlalchemy.ext.asyncio import AsyncSession
+class Factory:
+    """Фабрики данных напрямую в БД: быстрее, чем гонять всё через API."""
+
+    def __init__(self, make_user):  # type: ignore[no-untyped-def]
+        self.make_user = make_user
+
+    async def workspace(self, name: str = "Acme", owner=None):  # type: ignore[no-untyped-def]
+        from datetime import UTC, datetime
+
+        from app.db import SessionLocal
+        from app.services.workspaces import create_workspace
+
+        user, headers = owner or await self.make_user()
+        async with SessionLocal() as s:
+            ws = await create_workspace(s, user, name, datetime.now(UTC))
+            await s.commit()
+        return ws, user, headers
+
+    async def member(self, ws, role: str = "member", **kw):  # type: ignore[no-untyped-def]
+        from app.db import SessionLocal
+        from app.models import Membership, Role
+
+        user, headers = await self.make_user(**kw)
+        async with SessionLocal() as s:
+            s.add(Membership(workspace_id=ws.id, user_id=user.id, role=Role(role)))
+            await s.commit()
+        return user, headers
+
+    async def pro(  # type: ignore[no-untyped-def]
+        self,
+        ws,
+        *,
+        seats: int = 5,
+        now=None,
+        period: str = "month",
+        status: str = "active",
+        card: bool = True,
+    ):
+        """Переводит воркспейс в оплаченный Pro с картой."""
+        from datetime import UTC, datetime
+
+        from app.billing.proration import period_end
+        from app.db import SessionLocal
+        from app.models import BillingPeriod, PaymentMethod, Plan, Subscription, SubStatus
+
+        now = now or datetime.now(UTC)
+        async with SessionLocal() as s:
+            sub = await s.get(Subscription, ws.id)
+            assert sub is not None
+            sub.plan = Plan.pro
+            sub.status = SubStatus(status)
+            sub.billing_period = BillingPeriod(period)
+            sub.seats = seats
+            sub.current_period_start = now
+            sub.current_period_end = period_end(now, BillingPeriod(period))
+            if card:
+                pm = PaymentMethod(
+                    workspace_id=ws.id,
+                    provider="mock",
+                    provider_token="mock_pm_ok_1",
+                    brand="Visa",
+                    last4="4242",
+                )
+                s.add(pm)
+                await s.flush()
+                sub.payment_method_id = pm.id
+            await s.commit()
+
+
+@pytest.fixture
+def factory(make_user):  # type: ignore[no-untyped-def]
+    return Factory(make_user)
