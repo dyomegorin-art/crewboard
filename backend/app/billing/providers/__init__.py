@@ -12,7 +12,7 @@ def make_provider(session: AsyncSession, now: datetime) -> PaymentProvider:
     if name == "yookassa":
         from app.billing.providers.yookassa import YooKassaProvider
 
-        return YooKassaProvider()  # type: ignore[return-value]
+        return YooKassaProvider()
     from app.billing.providers.mock import MockProvider
 
     return MockProvider(session, now)

@@ -1,0 +1,9 @@
+{
+  "id": "2f1a7c10-000f-5000-8000-1d3a8f2b6c22",
+  "status": "canceled",
+  "paid": false,
+  "amount": {"value": "490.00", "currency": "RUB"},
+  "cancellation_details": {"party": "yoo_money", "reason": "insufficient_funds"},
+  "metadata": {"invoice_id": "1"},
+  "test": true
+}

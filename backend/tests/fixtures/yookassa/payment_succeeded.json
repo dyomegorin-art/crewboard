@@ -1,0 +1,14 @@
+{
+  "id": "2f1a7c10-000f-5000-8000-1d3a8f2b6c11",
+  "status": "succeeded",
+  "paid": true,
+  "amount": {"value": "490.00", "currency": "RUB"},
+  "payment_method": {
+    "type": "bank_card",
+    "id": "2f1a7c10-000f-5000-8000-1d3a8f2b6c11",
+    "saved": true,
+    "card": {"first6": "555555", "last4": "4444", "card_type": "MasterCard", "expiry_month": "12", "expiry_year": "2034"}
+  },
+  "metadata": {"invoice_id": "1"},
+  "test": true
+}

@@ -41,6 +41,7 @@ class ProviderEvent:
     provider_payment_id: str | None
     invoice_id: int | None
     method: MethodInfo | None = None
+    amount: int | None = None  # копейки, если провайдер сообщает сумму
     # Что именно участвует в fingerprint: для вебхука без подписи это ответ API провайдера,
     # а не присланное тело.
     canonical: dict[str, Any] = field(default_factory=dict)

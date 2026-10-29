@@ -1,0 +1,5 @@
+{
+  "type": "notification",
+  "event": "payment.succeeded",
+  "object": {"id": "2f1a7c10-000f-5000-8000-1d3a8f2b6c11", "status": "succeeded", "paid": true}
+}

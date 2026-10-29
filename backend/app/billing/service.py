@@ -297,6 +297,15 @@ async def _payment_succeeded(
             )
         )
         return "void_invoice"
+    if ev.amount is not None and ev.amount != invoice.amount:
+        # Сумма платежа не совпала со счётом: не применяем, пусть разберётся человек.
+        session.add(
+            SystemIssue(
+                kind="PAYMENT_AMOUNT_MISMATCH",
+                detail=f"invoice {invoice.id}: expected {invoice.amount}, got {ev.amount}",
+            )
+        )
+        return "amount_mismatch"
     invoice.status = InvoiceStatus.paid
     invoice.paid_at = now
     await _save_method(session, sub, ev, provider_name)
