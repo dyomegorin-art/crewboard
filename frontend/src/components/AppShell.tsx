@@ -148,7 +148,7 @@ function Sidebar({ workspaces }: { workspaces: { id: number; name: string; slug:
         ))}
         <option value="__new">+ Новый воркспейс…</option>
       </select>
-      <nav className="space-y-0.5">
+      <nav className="space-y-0.5" aria-label="Разделы">
         <NavLink to={`/w/${ws.slug}/my-tasks`} className={item}>Мои задачи</NavLink>
         <NavLink to={`/w/${ws.slug}/activity`} className={item}>Активность</NavLink>
         <NavLink to={`/w/${ws.slug}/members`} className={item}>Участники</NavLink>
