@@ -40,7 +40,7 @@ class Deps:
     now: datetime
     send_email: Callable[[str, str, str], Awaitable[None]]
     post_webhook: Callable[[str, bytes, dict[str, str]], Awaitable[int]]
-    provider: Any  # app.billing.providers.base.PaymentProvider
+    make_provider: Callable[[AsyncSession], Any]  # → PaymentProvider (привязан к сессии)
     redis: Any = None
 
 
