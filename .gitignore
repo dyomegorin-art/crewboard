@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+node_modules/
+dist/
+frontend/test-results/
+frontend/playwright-report/
+.DS_Store
