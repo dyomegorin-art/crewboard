@@ -331,21 +331,9 @@ async def webhook(
     headers = dict(request.headers)
     headers["x-client-ip"] = ip
     result = await receive(session, make_provider(session, now), await request.body(), headers, now)
-    if result.http_status == 200 and result.body.get("result") == "processed":
-        await _publish_billing_change(session, redis, result)
+    if result.workspace_id is not None:  # открытые вкладки обновят баннеры и счета
+        await publish(redis, result.workspace_id, "billing.changed")
     return JSONResponse(result.body, status_code=result.http_status)
-
-
-async def _publish_billing_change(session: AsyncSession, redis: Redis, result: Any) -> None:
-    """Сообщаем открытым вкладкам, что подписка изменилась (после коммита вебхука)."""
-    last = await session.scalar(
-        select(ActivityLog)
-        .where(ActivityLog.action.like("billing.%"))
-        .order_by(ActivityLog.id.desc())
-        .limit(1)
-    )
-    if last is not None:
-        await publish(redis, last.workspace_id, "billing.changed")
 
 
 def _require_mock() -> None:

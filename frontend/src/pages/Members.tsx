@@ -19,7 +19,7 @@ const inviteStatus: Record<Invitation["status"], string> = {
 
 function onPlanError(err: unknown): boolean {
   if (err instanceof ApiError && err.code.startsWith("plan_limit_")) {
-    promptUpgrade({ code: err.code, message: err.message });
+    promptUpgrade({ code: err.code, message: errorMessage(err) });
     return true;
   }
   return false;
@@ -31,7 +31,9 @@ export function MembersPage() {
   const qc = useQueryClient();
   const [inviting, setInviting] = useState(false);
   const members = useQuery({ queryKey: ["members", ws.id], queryFn: () => api.members(ws.id) });
-  const invites = useQuery({ queryKey: ["invitations", ws.id], queryFn: () => api.invitations(ws.id), enabled: can("members.invite") });
+  const invites = useQuery({ queryKey: ["invitations", ws.id], queryFn: () => api.invitations(ws.id), enabled: can("members.invite"),
+    // Место под приглашение оплачивается вебхуком — пока ждём, подстраховываем SSE опросом.
+    refetchInterval: (q) => (q.state.data?.some((i) => i.status === "awaiting_payment") ? 3000 : false) });
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["members", ws.id] });
     void qc.invalidateQueries({ queryKey: ["invitations", ws.id] });

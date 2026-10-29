@@ -244,10 +244,12 @@ async def find_invoice(session: AsyncSession, ev: ProviderEvent) -> Invoice | No
 
 async def apply_provider_event(
     session: AsyncSession, ev: ProviderEvent, now: datetime, provider_name: str
-) -> str:
-    """Применяет подтверждённое событие платежа. Возвращает краткий итог для лога."""
+) -> tuple[str, int | None]:
+    """Применяет подтверждённое событие платежа.
+
+    Возвращает краткий итог для лога и id воркспейса (чтобы оповестить открытые вкладки)."""
     if ev.type not in ("payment.succeeded", "payment.failed"):
-        return "ignored_type"
+        return "ignored_type", None
     invoice = await find_invoice(session, ev)
     if invoice is None:
         session.add(
@@ -256,11 +258,13 @@ async def apply_provider_event(
                 detail=f"{provider_name} event {ev.event_id}: payment {ev.provider_payment_id}",
             )
         )
-        return "unknown_invoice"
+        return "unknown_invoice", None
     sub = await get_subscription(session, invoice.workspace_id, lock=True)
     if ev.type == "payment.succeeded":
-        return await _payment_succeeded(session, sub, invoice, ev, now, provider_name)
-    return await _payment_failed(session, sub, invoice, now)
+        outcome = await _payment_succeeded(session, sub, invoice, ev, now, provider_name)
+    else:
+        outcome = await _payment_failed(session, sub, invoice, now)
+    return outcome, invoice.workspace_id
 
 
 async def _save_method(

@@ -144,16 +144,16 @@ export function BoardPage() {
             <option value="">Любой приоритет</option>
             {(Object.keys(priorityLabel) as Priority[]).map((p) => <option key={p} value={p}>{priorityLabel[p]}</option>)}
           </Select>
-          {can("projects.manage") && <ProjectMenu project={project} />}
+          {can("projects.manage") && !readOnly && <ProjectMenu project={project} />}
         </div>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
         <div className="flex min-h-0 flex-1 gap-3 overflow-x-auto p-4" data-testid="board">
           {statuses.map((s) => (
-            <Column key={s.id} status={s} tasks={byStatus(s.id) ?? EMPTY} members={members.data ?? []} editable={editable} onOpen={setOpenTask} projectId={pid} canManage={can("statuses.manage")} />
+            <Column key={s.id} status={s} tasks={byStatus(s.id) ?? EMPTY} members={members.data ?? []} editable={editable} onOpen={setOpenTask} projectId={pid} canManage={can("statuses.manage") && !readOnly} />
           ))}
-          {can("statuses.manage") && !project.archived && <AddColumn projectId={pid} />}
+          {can("statuses.manage") && !project.archived && !readOnly && <AddColumn projectId={pid} />}
         </div>
         <DragOverlay>{dragging ? <Card task={dragging} members={members.data ?? []} overlay /> : null}</DragOverlay>
       </DndContext>

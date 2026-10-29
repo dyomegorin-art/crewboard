@@ -6,6 +6,7 @@ import { ApiError } from "./api/client";
 import { AppShell } from "./components/AppShell";
 import { Skeleton } from "./components/ui";
 import { AuthProvider, useAuth } from "./hooks/auth";
+import { errorMessage } from "./lib/format";
 import { promptUpgrade, toast } from "./lib/ui-events";
 import { BillingPage, BillingReturn } from "./pages/Billing";
 import { AuthCallback, CheckEmail, ForgotPassword, Login, Register, ResetPassword, VerifyEmail } from "./pages/Auth";
@@ -19,7 +20,7 @@ import { SettingsPage } from "./pages/Settings";
 
 /** plan_limit_* от API → модалка «Перейдите на Pro» (кроме мест, где её показывает сама страница). */
 function handleGlobalError(err: unknown): void {
-  if (err instanceof ApiError && err.code.startsWith("plan_limit_")) promptUpgrade({ code: err.code, message: err.message });
+  if (err instanceof ApiError && err.code.startsWith("plan_limit_")) promptUpgrade({ code: err.code, message: errorMessage(err) });
 }
 
 function makeClient(): QueryClient {

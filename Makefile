@@ -14,7 +14,7 @@ test:
 
 lint:
 	$(COMPOSE) run --rm --no-deps api sh -c "ruff check . --output-format concise && ruff format --check . && mypy app"
-	$(COMPOSE) run --rm --no-deps web sh -c "npm ci --no-audit --no-fund && npm run lint && npm run typecheck"
+	$(COMPOSE) run --rm --no-deps web sh -c "npm install --no-audit --no-fund && npm run lint && npm run typecheck"
 
 seed:
 	$(COMPOSE) exec api python -m app.seed

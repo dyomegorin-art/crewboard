@@ -96,7 +96,7 @@ async def register(
     session.add(user)
     try:
         await session.flush()
-        await create_workspace(session, user, f"{body.name}'s workspace", now)
+        await create_workspace(session, user, f"Команда {body.name}", now)
         await queue_verification_email(session, user, now)
         raw, _ = await issue_refresh(session, user.id, now)
         await session.commit()
@@ -376,7 +376,7 @@ async def github_callback(
             existing = User(email=profile.email.lower(), name=profile.name, email_verified_at=now)
             session.add(existing)
             await session.flush()
-            await create_workspace(session, existing, f"{profile.name}'s workspace", now)
+            await create_workspace(session, existing, f"Команда {profile.name}", now)
         session.add(
             OAuthAccount(user_id=existing.id, provider="github", provider_account_id=profile.id)
         )

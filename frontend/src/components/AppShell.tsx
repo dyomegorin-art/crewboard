@@ -128,7 +128,7 @@ function Banners() {
 }
 
 function Sidebar({ workspaces }: { workspaces: { id: number; name: string; slug: string }[] }) {
-  const { ws, can } = useWorkspace();
+  const { ws, can, readOnly } = useWorkspace();
   const { user, signOut } = useAuth();
   const nav = useNavigate();
   const [creating, setCreating] = useState(false);
@@ -165,7 +165,7 @@ function Sidebar({ workspaces }: { workspaces: { id: number; name: string; slug:
           </NavLink>
         ))}
         {projects.data?.length === 0 && <p className="px-2.5 text-xs text-muted">Проектов пока нет</p>}
-        {can("projects.manage") && <NewProject />}
+        {can("projects.manage") && !readOnly && <NewProject />}
       </nav>
       <div className="mt-3 border-t border-line pt-3 text-sm">
         <div className="truncate px-1 font-medium">{user?.name}</div>

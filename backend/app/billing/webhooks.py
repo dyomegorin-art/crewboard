@@ -37,6 +37,7 @@ log = logging.getLogger("app.billing.webhooks")
 class IntakeResult:
     http_status: int
     body: dict[str, Any]
+    workspace_id: int | None = None  # чьё состояние изменилось (для SSE)
 
 
 def fingerprint(payload: dict[str, Any]) -> str:
@@ -155,7 +156,7 @@ async def _process(
         return await _resolve_existing(session, delivery_id, winner, fp)
 
     try:
-        outcome = await apply_provider_event(session, ev, now, provider.name)
+        outcome, workspace_id = await apply_provider_event(session, ev, now, provider.name)
     except InvalidTransition as exc:
         # Недопустимый переход: повтор не поможет. Событие откатываем, но SystemIssue
         # пишем заново — rollback унёс и ту запись, что сделал автомат.
@@ -177,4 +178,4 @@ async def _process(
     delivery.event_id = event.id
     delivery.parse_status = "OK"
     await session.commit()
-    return IntakeResult(200, {"result": "processed", "outcome": outcome})
+    return IntakeResult(200, {"result": "processed", "outcome": outcome}, workspace_id)

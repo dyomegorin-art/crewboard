@@ -201,7 +201,7 @@ async def test_processing_failure_marks_delivery_failed_and_returns_500(
     ws, _, event = await open_invoice(client, factory)
     from app.billing import webhooks
 
-    async def boom(*a: Any, **k: Any) -> str:
+    async def boom(*a: Any, **k: Any) -> tuple[str, int | None]:
         raise RuntimeError("db exploded")
 
     monkeypatch.setattr(webhooks, "apply_provider_event", boom)

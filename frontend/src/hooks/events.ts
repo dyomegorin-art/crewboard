@@ -23,6 +23,8 @@ export function useWorkspaceEvents(workspaceId: number, myUserId: number): void 
             void qc.invalidateQueries({ queryKey: wsKey(workspaceId) });
             void qc.invalidateQueries({ queryKey: ["billing", workspaceId] });
             void qc.invalidateQueries({ queryKey: ["invoices", workspaceId] });
+            void qc.invalidateQueries({ queryKey: ["invitations", workspaceId] });
+            void qc.invalidateQueries({ queryKey: ["members", workspaceId] });
             return;
           }
           if (ev.actor_id === myUserId && ev.type !== "project.changed") return; // свои правки уже в кэше
