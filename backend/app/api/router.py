@@ -1,6 +1,17 @@
 from fastapi import APIRouter
 
-from app.api import auth, billing, dev, invitations, me, projects, tasks, workspace
+from app.api import (
+    auth,
+    billing,
+    dev,
+    events,
+    export,
+    invitations,
+    me,
+    projects,
+    tasks,
+    workspace,
+)
 from app.config import get_settings
 
 api_router = APIRouter(prefix="/api")
@@ -15,3 +26,5 @@ api_router.include_router(billing.router)
 api_router.include_router(billing.public_router)
 if get_settings().dev_endpoints:
     api_router.include_router(dev.router)
+api_router.include_router(events.router)
+api_router.include_router(export.router)
