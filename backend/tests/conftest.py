@@ -191,6 +191,18 @@ class Factory:
                 sub.payment_method_id = pm.id
             await s.commit()
 
+    async def set_status(self, ws, status: str, **fields):  # type: ignore[no-untyped-def]
+        from app.db import SessionLocal
+        from app.models import Subscription, SubStatus
+
+        async with SessionLocal() as s:
+            sub = await s.get(Subscription, ws.id)
+            assert sub is not None
+            sub.status = SubStatus(status)
+            for k, v in fields.items():
+                setattr(sub, k, v)
+            await s.commit()
+
 
 @pytest.fixture
 def factory(make_user):  # type: ignore[no-untyped-def]

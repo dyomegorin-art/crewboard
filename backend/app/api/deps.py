@@ -4,12 +4,15 @@ from dataclasses import dataclass
 import jwt
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clock import Clock, get_clock
 from app.db import get_session
 from app.errors import AppError
+from app.events import publish
 from app.models import Membership, Role, Subscription, SubStatus, User
+from app.redis import get_redis
 from app.security import decode_token
 from app.services.audit import audit
 
@@ -98,6 +101,11 @@ class WorkspaceCtx:
     membership: Membership
     session: AsyncSession
     now_: Clock
+    redis: Redis
+
+    async def publish(self, event_type: str, **data: object) -> None:
+        """Событие для открытых досок других участников (вызывать после commit)."""
+        await publish(self.redis, self.workspace_id, event_type, actor_id=self.user.id, **data)
 
     @property
     def workspace_id(self) -> int:
@@ -144,6 +152,7 @@ def require(permission: str, *, write: bool = False) -> Callable[..., Awaitable[
         user: User = Depends(get_current_user),
         session: AsyncSession = Depends(get_session),
         clock: Clock = Depends(get_clock),
+        redis: Redis = Depends(get_redis),
     ) -> WorkspaceCtx:
         if permission not in PERMISSIONS[membership.role]:
             await audit(
@@ -155,7 +164,9 @@ def require(permission: str, *, write: bool = False) -> Callable[..., Awaitable[
             raise AppError(403, "forbidden", "Insufficient permissions")
         if write:
             await ensure_writable(session, membership.workspace_id)
-        return WorkspaceCtx(user=user, membership=membership, session=session, now_=clock)
+        return WorkspaceCtx(
+            user=user, membership=membership, session=session, now_=clock, redis=redis
+        )
 
     return dependency
 
