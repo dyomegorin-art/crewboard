@@ -111,6 +111,8 @@ jobs:
       - name: Install Playwright
         working-directory: frontend
         run: |
+          # docker compose creates a root-owned node_modules mount point on the host
+          sudo chown -R "$USER":"$USER" .
           npm ci
           npx playwright install --with-deps chromium
       - name: Run e2e
